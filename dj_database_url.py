@@ -56,21 +56,24 @@ else:
     SCHEMES['pgsql'] = 'django.db.backends.postgresql'
 
 
-def config(env=DEFAULT_ENV, default=None, engine=None, conn_max_age=0, ssl_require=False):
+def config(env=DEFAULT_ENV, default=None, engine=None, conn_max_age=0, ssl_require=False,
+           extra_options=None):
     """Returns configured DATABASE dictionary from DATABASE_URL."""
 
-    config = {}
+    configuration = {}
+    default_url = os.environ.get(env, default)
 
-    s = os.environ.get(env, default)
+    if default_url:
+        configuration = parse(default_url, engine, conn_max_age, ssl_require, extra_options)
 
-    if s:
-        config = parse(s, engine, conn_max_age, ssl_require)
-
-    return config
+    return configuration
 
 
-def parse(url, engine=None, conn_max_age=0, ssl_require=False):
+def parse(url, engine=None, conn_max_age=0, ssl_require=False, extra_options=None):
     """Parses a database URL."""
+
+    if not extra_options:
+        extra_options = {}
 
     if url == 'sqlite://:memory:':
         # this is a special case, because if we pass this URL into
@@ -83,7 +86,7 @@ def parse(url, engine=None, conn_max_age=0, ssl_require=False):
         # note: no other settings are required for sqlite
 
     # otherwise parse the url as normal
-    config = {}
+    configuration = {}
 
     url = urlparse.urlparse(url)
 
@@ -118,7 +121,7 @@ def parse(url, engine=None, conn_max_age=0, ssl_require=False):
             else url.port)
 
     # Update with environment configuration.
-    config.update({
+    configuration.update({
         'NAME': urlparse.unquote(path or ''),
         'USER': urlparse.unquote(url.username or ''),
         'PASSWORD': urlparse.unquote(url.password or ''),
@@ -149,9 +152,10 @@ def parse(url, engine=None, conn_max_age=0, ssl_require=False):
         options['options'] = '-c search_path={0}'.format(options.pop('currentSchema'))
 
     if options:
-        config['OPTIONS'] = options
+        merged_options = {**options, **extra_options}
+        configuration['OPTIONS'] = merged_options
 
     if engine:
-        config['ENGINE'] = engine
+        configuration['ENGINE'] = engine
 
-    return config
+    return configuration

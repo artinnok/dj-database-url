@@ -6,7 +6,7 @@ with open('README.rst') as readme_rst:
 
 setup(
     name="dj-database-url",
-    version="0.5.0",
+    version="0.5.1",
     url="https://github.com/jacobian/dj-database-url",
     license="BSD",
     author="Kenneth Reitz",
@@ -26,6 +26,8 @@ setup(
         "Framework :: Django :: 2.1",
         "Framework :: Django :: 2.2",
         "Framework :: Django :: 3.0",
+        "Framework :: Django :: 3.1",
+        "Framework :: Django :: 3.2",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
